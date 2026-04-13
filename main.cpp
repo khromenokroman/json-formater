@@ -180,10 +180,14 @@ static std::string render_page(const std::string& input_json,
     body {
       margin: 0;
       padding: 24px;
-      font-family: Arial, sans-serif;
+      font-family: "Cambria", serif;
       background: #f5f7fb;
       color: #1f2937;
       font-size: 18px;
+    }
+
+    button, input, textarea, select, option, .json-output, .hint, .error, h1, h3 {
+      font-family: "Cambria", serif;
     }
 
     .container {
@@ -198,7 +202,7 @@ static std::string render_page(const std::string& input_json,
 
     h3 {
       font-size: 22px;
-      margin-bottom: 12px;
+      margin: 0 0 12px 0;
     }
 
     .grid {
@@ -211,20 +215,22 @@ static std::string render_page(const std::string& input_json,
     .left-panel {
       display: flex;
       flex-direction: column;
+      height: 100%;
     }
 
     .right-panel {
       display: flex;
       flex-direction: column;
+      height: 100%;
     }
 
-    textarea, .json-output {
+    .left-panel textarea,
+    .json-output {
       width: 100%;
       box-sizing: border-box;
       padding: 16px;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
-      font-family: Consolas, monospace;
       font-size: 18px;
       line-height: 1.5;
       background: white;
@@ -237,10 +243,11 @@ static std::string render_page(const std::string& input_json,
       max-height: 37.5vh;
       resize: vertical;
       white-space: pre;
+      overflow: auto;
     }
 
-    /* Правое окно — выше */
-    .json-output {
+    /* Правая часть занимает больше места */
+    .right-panel .json-output {
       height: 70vh;
       min-height: 500px;
       max-height: 75vh;
@@ -249,8 +256,13 @@ static std::string render_page(const std::string& input_json,
       word-break: break-word;
     }
 
+    /* Блок с кнопкой прижат к нижней границе левого окна */
     .actions {
-      margin: 18px 0;
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-end;
+      min-height: 52px;
     }
 
     button {
@@ -322,6 +334,9 @@ static std::string render_page(const std::string& input_json,
           <textarea name="json" placeholder='{"name":"Alex","age":20,"items":[1,2,3]}'>)";
     html += html_escape(input_json);
     html += R"(</textarea>
+          <div class="actions">
+            <button type="submit">Format</button>
+          </div>
         </div>
 
         <div class="right-panel">
@@ -330,10 +345,6 @@ static std::string render_page(const std::string& input_json,
     html += output_json_html.empty() ? std::string() : output_json_html;
     html += R"(</div>
         </div>
-      </div>
-
-      <div class="actions">
-        <button type="submit">Format</button>
       </div>
     </form>)";
 
