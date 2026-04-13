@@ -8,23 +8,35 @@
 
 using json = nlohmann::json;
 
-static std::string html_escape(const std::string& s) {
+static std::string html_escape(const std::string &s) {
     std::string out;
     out.reserve(s.size());
-    for (char c : s) {
+    for (char c: s) {
         switch (c) {
-            case '&': out += "&amp;"; break;
-            case '<': out += "&lt;"; break;
-            case '>': out += "&gt;"; break;
-            case '"': out += "&quot;"; break;
-            case '\'': out += "&#39;"; break;
-            default: out += c; break;
+            case '&':
+                out += "&amp;";
+                break;
+            case '<':
+                out += "&lt;";
+                break;
+            case '>':
+                out += "&gt;";
+                break;
+            case '"':
+                out += "&quot;";
+                break;
+            case '\'':
+                out += "&#39;";
+                break;
+            default:
+                out += c;
+                break;
         }
     }
     return out;
 }
 
-static std::string url_decode(const std::string& src) {
+static std::string url_decode(const std::string &src) {
     std::string out;
     out.reserve(src.size());
 
@@ -34,9 +46,12 @@ static std::string url_decode(const std::string& src) {
             out += ' ';
         } else if (c == '%' && i + 2 < src.size()) {
             auto hex = [](char x) -> int {
-                if (x >= '0' && x <= '9') return x - '0';
-                if (x >= 'a' && x <= 'f') return 10 + (x - 'a');
-                if (x >= 'A' && x <= 'F') return 10 + (x - 'A');
+                if (x >= '0' && x <= '9')
+                    return x - '0';
+                if (x >= 'a' && x <= 'f')
+                    return 10 + (x - 'a');
+                if (x >= 'A' && x <= 'F')
+                    return 10 + (x - 'A');
                 return -1;
             };
             int hi = hex(src[i + 1]);
@@ -55,7 +70,7 @@ static std::string url_decode(const std::string& src) {
     return out;
 }
 
-static std::string json_to_highlighted_html(const json& value) {
+static std::string json_to_highlighted_html(const json &value) {
     std::ostringstream oss;
     std::string pretty = value.dump(4);
 
@@ -128,8 +143,8 @@ static std::string json_to_highlighted_html(const json& value) {
             size_t end = i + 1;
             while (end < pretty.size()) {
                 char nc = pretty[end];
-                if (std::isdigit(static_cast<unsigned char>(nc)) || nc == '.' || nc == 'e' || nc == 'E' ||
-                    nc == '+' || nc == '-') {
+                if (std::isdigit(static_cast<unsigned char>(nc)) || nc == '.' || nc == 'e' || nc == 'E' || nc == '+' ||
+                    nc == '-') {
                     ++end;
                 } else {
                     break;
@@ -162,9 +177,8 @@ static std::string json_to_highlighted_html(const json& value) {
     return oss.str();
 }
 
-static std::string render_page(const std::string& input_json,
-                               const std::string& output_json_html,
-                               const std::string& error_message) {
+static std::string render_page(const std::string &input_json, const std::string &output_json_html,
+                               const std::string &error_message) {
     std::string html;
     html += R"(<!doctype html>
 <html lang="ru">
@@ -236,7 +250,6 @@ static std::string render_page(const std::string& input_json,
       background: white;
     }
 
-    /* Левое окно — в 2 раза ниже правого */
     .left-panel textarea {
       height: 35vh;
       min-height: 250px;
@@ -246,7 +259,6 @@ static std::string render_page(const std::string& input_json,
       overflow: auto;
     }
 
-    /* Правая часть занимает больше места */
     .right-panel .json-output {
       height: 70vh;
       min-height: 500px;
@@ -256,10 +268,10 @@ static std::string render_page(const std::string& input_json,
       word-break: break-word;
     }
 
-    /* Блок с кнопкой прижат к нижней границе левого окна */
     .actions {
       margin-top: 12px;
       display: flex;
+      gap: 12px;
       justify-content: flex-start;
       align-items: flex-end;
       min-height: 52px;
@@ -325,7 +337,7 @@ static std::string render_page(const std::string& input_json,
 <body>
   <div class="container">
     <h1>JSON Formatter</h1>
-    <p class="hint">Вставь JSON слева и нажми кнопку форматирования.</p>
+    <p class="hint">Вставь JSON слева и нажми Format или Compress.</p>
 
     <form method="post" action="/format">
       <div class="grid">
@@ -335,12 +347,13 @@ static std::string render_page(const std::string& input_json,
     html += html_escape(input_json);
     html += R"(</textarea>
           <div class="actions">
-            <button type="submit">Format</button>
+            <button type="submit" formaction="/format">Format</button>
+            <button type="submit" formaction="/compress">Compress</button>
           </div>
         </div>
 
         <div class="right-panel">
-          <h3>Форматированный JSON</h3>
+          <h3>Результат</h3>
           <div class="json-output">)";
     html += output_json_html.empty() ? std::string() : output_json_html;
     html += R"(</div>
@@ -361,7 +374,7 @@ static std::string render_page(const std::string& input_json,
     return html;
 }
 
-static std::string extract_json_from_form(const std::string& body) {
+static std::string extract_json_from_form(const std::string &body) {
     const std::string prefix = "json=";
     if (body.rfind(prefix, 0) == 0) {
         return url_decode(body.substr(prefix.size()));
@@ -372,11 +385,11 @@ static std::string extract_json_from_form(const std::string& body) {
 int main() {
     httplib::Server server;
 
-    server.Get("/", [](const httplib::Request&, httplib::Response& res) {
+    server.Get("/", [](const httplib::Request &, httplib::Response &res) {
         res.set_content(render_page("", "", ""), "text/html; charset=UTF-8");
     });
 
-    server.Post("/format", [](const httplib::Request& req, httplib::Response& res) {
+    server.Post("/format", [](const httplib::Request &req, httplib::Response &res) {
         std::string input_json = extract_json_from_form(req.body);
         std::string output_json_html;
         std::string error_message;
@@ -384,7 +397,22 @@ int main() {
         try {
             json parsed = json::parse(input_json);
             output_json_html = json_to_highlighted_html(parsed);
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
+            error_message = std::string("Ошибка JSON: ") + e.what();
+        }
+
+        res.set_content(render_page(input_json, output_json_html, error_message), "text/html; charset=UTF-8");
+    });
+
+    server.Post("/compress", [](const httplib::Request &req, httplib::Response &res) {
+        std::string input_json = extract_json_from_form(req.body);
+        std::string output_json_html;
+        std::string error_message;
+
+        try {
+            json parsed = json::parse(input_json);
+            output_json_html = html_escape(parsed.dump());
+        } catch (const std::exception &e) {
             error_message = std::string("Ошибка JSON: ") + e.what();
         }
 
