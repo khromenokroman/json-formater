@@ -208,11 +208,18 @@ static std::string render_page(const std::string& input_json,
       align-items: start;
     }
 
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+    }
+
     textarea, .json-output {
       width: 100%;
-      height: 70vh;
-      min-height: 500px;
-      max-height: 75vh;
       box-sizing: border-box;
       padding: 16px;
       border: 1px solid #cbd5e1;
@@ -223,12 +230,20 @@ static std::string render_page(const std::string& input_json,
       background: white;
     }
 
-    textarea {
+    /* Левое окно — в 2 раза ниже правого */
+    .left-panel textarea {
+      height: 35vh;
+      min-height: 250px;
+      max-height: 37.5vh;
       resize: vertical;
       white-space: pre;
     }
 
+    /* Правое окно — выше */
     .json-output {
+      height: 70vh;
+      min-height: 500px;
+      max-height: 75vh;
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-word;
@@ -275,7 +290,8 @@ static std::string render_page(const std::string& input_json,
         grid-template-columns: 1fr;
       }
 
-      textarea, .json-output {
+      .left-panel textarea,
+      .json-output {
         height: 50vh;
         max-height: 50vh;
       }
@@ -301,13 +317,14 @@ static std::string render_page(const std::string& input_json,
 
     <form method="post" action="/format">
       <div class="grid">
-        <div>
+        <div class="left-panel">
           <h3>Неформатированный JSON</h3>
           <textarea name="json" placeholder='{"name":"Alex","age":20,"items":[1,2,3]}'>)";
     html += html_escape(input_json);
     html += R"(</textarea>
         </div>
-        <div>
+
+        <div class="right-panel">
           <h3>Форматированный JSON</h3>
           <div class="json-output">)";
     html += output_json_html.empty() ? std::string() : output_json_html;
