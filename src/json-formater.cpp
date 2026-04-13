@@ -21,40 +21,65 @@ JsonFormater::JsonFormater() {
     syslog(LOG_DEBUG, "Получены настройки:\n%s", cfg.dump(1).c_str());
 }
 void JsonFormater::run() {
-    m_server.Get("/", [this](const httplib::Request &, httplib::Response &res) {
+    m_server.Get("/", [this](const httplib::Request &req, httplib::Response &res) {
+        syslog(LOG_DEBUG, "Поступил запрос от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+               req.local_addr.c_str(), req.local_port);
+
         syslog(LOG_DEBUG, "Отображение основной страницы '/'");
         res.set_content(render_page("", "", ""), "text/html; charset=UTF-8");
     });
 
     m_server.Post("/format", [this](const httplib::Request &req, httplib::Response &res) {
+        syslog(LOG_DEBUG, "Поступил запрос от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+               req.local_addr.c_str(), req.local_port);
+
         std::string input_json = std::move(extract_json_from_form(std::move(req.body)));
         std::string output_json_html;
         std::string error_message;
+        ::nlohmann::json parsed{};
 
         try {
-            ::nlohmann::json parsed = ::nlohmann::json::parse(input_json);
-            output_json_html = std::move(json_to_highlighted_html(std::move(parsed)));
-        } catch (const std::exception &e) {
-            error_message = std::string("Ошибка JSON: ") + e.what();
+            parsed = std::move(::nlohmann::json::parse(input_json));
+            output_json_html = std::move(json_to_highlighted_html(parsed));
+        } catch (const std::exception &ex) {
+            error_message = ::fmt::format("Ошибка JSON: {}", ex.what());
         }
 
         syslog(LOG_DEBUG, "Отображение страницы '/format'");
+        syslog(LOG_DEBUG, "Исходный json:\n%s", input_json.c_str());
+        syslog(LOG_DEBUG, "Форматированный json:\n%s", parsed.dump(1).c_str());
+        syslog(LOG_DEBUG, "Форматированный json(с подсветкой):\n%s", output_json_html.c_str());
+        if (!error_message.empty()) {
+            syslog(LOG_DEBUG, "Есть ошибка при конвертации: %s", error_message.c_str());
+        }
+
         res.set_content(render_page(input_json, output_json_html, error_message), "text/html; charset=UTF-8");
     });
 
     m_server.Post("/compress", [this](const httplib::Request &req, httplib::Response &res) {
+        syslog(LOG_DEBUG, "Поступил запрос от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+               req.local_addr.c_str(), req.local_port);
+
         std::string input_json = extract_json_from_form(req.body);
         std::string output_json_html;
         std::string error_message;
+        ::nlohmann::json parsed{};
 
         try {
-            ::nlohmann::json parsed = ::nlohmann::json::parse(input_json);
+            parsed = std::move(::nlohmann::json::parse(std::move(input_json)));
             output_json_html = html_escape(parsed.dump());
         } catch (const std::exception &ex) {
             error_message = ::fmt::format("Ошибка JSON: {}", ex.what());
         }
 
         syslog(LOG_DEBUG, "Отображение страницы '/compress'");
+        syslog(LOG_DEBUG, "Исходный json:\n%s", input_json.c_str());
+        syslog(LOG_DEBUG, "Сжатый json:\n%s", parsed.dump().c_str());
+        syslog(LOG_DEBUG, "Сжатый json(с эскейпами):\n%s", output_json_html.c_str());
+        if (!error_message.empty()) {
+            syslog(LOG_DEBUG, "Есть ошибка при конвертации: %s", error_message.c_str());
+        }
+
         res.set_content(render_page(input_json, output_json_html, error_message), "text/html; charset=UTF-8");
     });
 
