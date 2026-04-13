@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-
+#include "json-formater.hpp"
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 
@@ -441,43 +441,51 @@ static std::string extract_json_from_form(const std::string &body) {
 }
 
 int main() {
-    httplib::Server server;
-
-    server.Get("/", [](const httplib::Request &, httplib::Response &res) {
-        res.set_content(render_page("", "", ""), "text/html; charset=UTF-8");
-    });
-
-    server.Post("/format", [](const httplib::Request &req, httplib::Response &res) {
-        std::string input_json = extract_json_from_form(req.body);
-        std::string output_json_html;
-        std::string error_message;
-
-        try {
-            json parsed = json::parse(input_json);
-            output_json_html = json_to_highlighted_html(parsed);
-        } catch (const std::exception &e) {
-            error_message = std::string("Ошибка JSON: ") + e.what();
-        }
-
-        res.set_content(render_page(input_json, output_json_html, error_message), "text/html; charset=UTF-8");
-    });
-
-    server.Post("/compress", [](const httplib::Request &req, httplib::Response &res) {
-        std::string input_json = extract_json_from_form(req.body);
-        std::string output_json_html;
-        std::string error_message;
-
-        try {
-            json parsed = json::parse(input_json);
-            output_json_html = html_escape(parsed.dump());
-        } catch (const std::exception &e) {
-            error_message = std::string("Ошибка JSON: ") + e.what();
-        }
-
-        res.set_content(render_page(input_json, output_json_html, error_message), "text/html; charset=UTF-8");
-    });
-
-    std::cout << "Server started: http://localhost:8080\n";
-    server.listen("0.0.0.0", 8080);
+    try {
+        JsonFormater json_formater;
+        json_formater.run();
+        return EXIT_SUCCESS;
+    } catch (std::exception const &ex) {
+        std::cerr << "Ошибка запуска приложения: " << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    // httplib::Server server;
+    //
+    // server.Get("/", [](const httplib::Request &, httplib::Response &res) {
+    //     res.set_content(render_page("", "", ""), "text/html; charset=UTF-8");
+    // });
+    //
+    // server.Post("/format", [](const httplib::Request &req, httplib::Response &res) {
+    //     std::string input_json = extract_json_from_form(req.body);
+    //     std::string output_json_html;
+    //     std::string error_message;
+    //
+    //     try {
+    //         json parsed = json::parse(input_json);
+    //         output_json_html = json_to_highlighted_html(parsed);
+    //     } catch (const std::exception &e) {
+    //         error_message = std::string("Ошибка JSON: ") + e.what();
+    //     }
+    //
+    //     res.set_content(render_page(input_json, output_json_html, error_message), "text/html; charset=UTF-8");
+    // });
+    //
+    // server.Post("/compress", [](const httplib::Request &req, httplib::Response &res) {
+    //     std::string input_json = extract_json_from_form(req.body);
+    //     std::string output_json_html;
+    //     std::string error_message;
+    //
+    //     try {
+    //         json parsed = json::parse(input_json);
+    //         output_json_html = html_escape(parsed.dump());
+    //     } catch (const std::exception &e) {
+    //         error_message = std::string("Ошибка JSON: ") + e.what();
+    //     }
+    //
+    //     res.set_content(render_page(input_json, output_json_html, error_message), "text/html; charset=UTF-8");
+    // });
+    //
+    // std::cout << "Server started: http://localhost:8080\n";
+    // server.listen("0.0.0.0", 8080);
     return 0;
 }
