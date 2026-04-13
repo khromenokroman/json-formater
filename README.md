@@ -1,5 +1,17 @@
 # JsonFormater
 
+**JsonFormater** — это веб-сервис на C++ для работы с JSON: он принимает JSON через веб-страницу, умеет красиво форматировать его, сжимать в одну строку, подсвечивать синтаксис и позволяет быстро копировать или очищать содержимое полей.
+
+## Требования
+
+### Для сборки
+
+- CMake 3.26+
+- C++20
+- `fmt`
+- `cpp-httplib`
+- `nlohmann-json`
+
 ````bash
 apt install -y build-essential cmake libfmt-dev nlohmann-json3-dev dpkg-dev libcpp-httplib-dev
 ````
@@ -61,3 +73,16 @@ systemctl status json-formater
 ```
 
 По умолчанию сервер доступен на: http://localhost:8080
+
+## Логирование
+
+Приложение пишет сообщения в `syslog`.
+
+Используются уровни:
+
+- `LOG_ERR`
+- `LOG_INFO`
+- `LOG_NOTICE`
+- `LOG_DEBUG`
+
+Уровень фильтрации можно настраивать в коде через `setlogmask()`.
