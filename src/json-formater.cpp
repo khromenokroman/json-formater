@@ -18,11 +18,11 @@ JsonFormater::JsonFormater() {
     m_port = cfg.value("port", 8080);
     auto log_level = cfg.value("log_level", LOG_INFO);
     setlogmask(LOG_UPTO(log_level));
-    syslog(LOG_DEBUG, "Получены настройки:\n%s", cfg.dump(1).c_str());
+    syslog(LOG_INFO, "Получены настройки:\n%s", cfg.dump(1).c_str());
 }
 void JsonFormater::run() {
     m_server.Get("/", [this](const httplib::Request &req, httplib::Response &res) {
-        syslog(LOG_DEBUG, "Поступил запрос от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+        syslog(LOG_INFO, "Поступил запрос('/') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
                req.local_addr.c_str(), req.local_port);
 
         syslog(LOG_DEBUG, "Отображение основной страницы '/'");
@@ -30,7 +30,7 @@ void JsonFormater::run() {
     });
 
     m_server.Post("/format", [this](const httplib::Request &req, httplib::Response &res) {
-        syslog(LOG_DEBUG, "Поступил запрос от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+        syslog(LOG_INFO, "Поступил запрос('/format') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
                req.local_addr.c_str(), req.local_port);
 
         std::string input_json = std::move(extract_json_from_form(std::move(req.body)));
@@ -57,7 +57,7 @@ void JsonFormater::run() {
     });
 
     m_server.Post("/compress", [this](const httplib::Request &req, httplib::Response &res) {
-        syslog(LOG_DEBUG, "Поступил запрос от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
+        syslog(LOG_INFO, "Поступил запрос('/compress') от %s:%d на %s:%d", req.remote_addr.c_str(), req.remote_port,
                req.local_addr.c_str(), req.local_port);
 
         std::string input_json = extract_json_from_form(req.body);
