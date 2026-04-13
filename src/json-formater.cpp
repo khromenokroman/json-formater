@@ -84,7 +84,7 @@ void JsonFormater::run() {
     });
 
     syslog(LOG_NOTICE, "Запущен сервер на http://127.0.0.1:%d", static_cast<int>(m_port));
-    m_server.listen("0.0.0.0", 8080);
+    m_server.listen("0.0.0.0", m_port);
 }
 std::string JsonFormater::html_escape(std::string const &s) {
     std::string out;
