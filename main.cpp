@@ -173,77 +173,123 @@ static std::string render_page(const std::string& input_json,
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JSON Formatter</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       padding: 24px;
       font-family: Arial, sans-serif;
       background: #f5f7fb;
       color: #1f2937;
+      font-size: 18px;
     }
+
     .container {
-      max-width: 1200px;
+      max-width: 1600px;
       margin: 0 auto;
     }
+
     h1 {
       margin-top: 0;
+      font-size: 34px;
     }
+
+    h3 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 20px;
+      align-items: start;
     }
+
     textarea, .json-output {
       width: 100%;
-      min-height: 420px;
+      height: 70vh;
+      min-height: 500px;
+      max-height: 75vh;
       box-sizing: border-box;
-      padding: 12px;
+      padding: 16px;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
       font-family: Consolas, monospace;
-      font-size: 14px;
-      resize: vertical;
+      font-size: 18px;
+      line-height: 1.5;
       background: white;
     }
+
     textarea {
+      resize: vertical;
       white-space: pre;
     }
+
     .json-output {
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-word;
     }
+
     .actions {
-      margin: 16px 0;
+      margin: 18px 0;
     }
+
     button {
-      padding: 10px 18px;
+      padding: 12px 22px;
       border: none;
       border-radius: 10px;
       background: #2563eb;
       color: white;
-      font-size: 14px;
+      font-size: 18px;
       cursor: pointer;
     }
+
     button:hover {
       background: #1d4ed8;
     }
+
     .hint {
       color: #6b7280;
-      font-size: 14px;
+      font-size: 16px;
     }
+
     .error {
       margin-top: 16px;
       color: #dc2626;
       white-space: pre-wrap;
+      font-size: 16px;
     }
-    .json-key { color: #7c3aed; font-weight: bold; }
+
+    .json-key { color: #7c3aed; }
     .json-string { color: #15803d; }
     .json-number { color: #d97706; }
-    .json-bool { color: #2563eb; font-weight: bold; }
-    .json-null { color: #dc2626; font-weight: bold; }
+    .json-bool { color: #2563eb; }
+    .json-null { color: #dc2626; }
+
     @media (max-width: 900px) {
       .grid {
         grid-template-columns: 1fr;
+      }
+
+      textarea, .json-output {
+        height: 50vh;
+        max-height: 50vh;
+      }
+
+      body {
+        font-size: 16px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      h3 {
+        font-size: 20px;
       }
     }
   </style>
