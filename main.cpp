@@ -180,7 +180,7 @@ static std::string json_to_highlighted_html(const json &value) {
 static std::string render_page(const std::string &input_json, const std::string &output_json_html,
                                const std::string &error_message) {
     std::string html;
-    html += R"(<!doctype html>
+    html += R"HTML(<!doctype html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
@@ -200,7 +200,7 @@ static std::string render_page(const std::string &input_json, const std::string 
       font-size: 18px;
     }
 
-    button, input, textarea, select, option, .json-output, .hint, .error, h1, h3 {
+    button, input, textarea, select, option, .json-output, .hint, .error, h1, h3, .small-btn {
       font-family: "Cambria", serif;
     }
 
@@ -216,7 +216,7 @@ static std::string render_page(const std::string &input_json, const std::string 
 
     h3 {
       font-size: 22px;
-      margin: 0 0 12px 0;
+      margin: 0;
     }
 
     .grid {
@@ -226,16 +226,38 @@ static std::string render_page(const std::string &input_json, const std::string 
       align-items: start;
     }
 
-    .left-panel {
+    .panel {
       display: flex;
       flex-direction: column;
       height: 100%;
     }
 
-    .right-panel {
+    .panel-header {
       display: flex;
-      flex-direction: column;
-      height: 100%;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .small-btn {
+      padding: 6px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1f2937;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .small-btn:hover {
+      background: #e2e8f0;
     }
 
     .left-panel textarea,
@@ -277,7 +299,7 @@ static std::string render_page(const std::string &input_json, const std::string 
       min-height: 52px;
     }
 
-    button {
+    .main-btn {
       padding: 12px 22px;
       border: none;
       border-radius: 10px;
@@ -287,7 +309,7 @@ static std::string render_page(const std::string &input_json, const std::string 
       cursor: pointer;
     }
 
-    button:hover {
+    .main-btn:hover {
       background: #1d4ed8;
     }
 
@@ -341,36 +363,72 @@ static std::string render_page(const std::string &input_json, const std::string 
 
     <form method="post" action="/format">
       <div class="grid">
-        <div class="left-panel">
-          <h3>Неформатированный JSON</h3>
-          <textarea name="json" placeholder='{"name":"Alex","age":20,"items":[1,2,3]}'>)";
+        <div class="panel left-panel">
+          <div class="panel-header">
+            <h3>Неформатированный JSON</h3>
+            <div class="panel-actions">
+              <button type="button" class="small-btn" onclick="clearInput()">Clear</button>
+              <button type="button" class="small-btn" onclick="copyInput()">Copy</button>
+            </div>
+          </div>
+
+          <textarea id="inputJson" name="json" placeholder='{"name":"Alex","age":20,"items":[1,2,3]}'>)HTML";
     html += html_escape(input_json);
-    html += R"(</textarea>
+    html += R"HTML(</textarea>
+
           <div class="actions">
-            <button type="submit" formaction="/format">Format</button>
-            <button type="submit" formaction="/compress">Compress</button>
+            <button type="submit" formaction="/format" class="main-btn">Format</button>
+            <button type="submit" formaction="/compress" class="main-btn">Compress</button>
           </div>
         </div>
 
-        <div class="right-panel">
-          <h3>Результат</h3>
-          <div class="json-output">)";
+        <div class="panel right-panel">
+          <div class="panel-header">
+            <h3>Результат</h3>
+            <div class="panel-actions">
+              <button type="button" class="small-btn" onclick="clearOutput()">Clear</button>
+              <button type="button" class="small-btn" onclick="copyOutput()">Copy</button>
+            </div>
+          </div>
+
+          <div id="outputJson" class="json-output">)HTML";
     html += output_json_html.empty() ? std::string() : output_json_html;
-    html += R"(</div>
+    html += R"HTML(</div>
         </div>
       </div>
-    </form>)";
+    </form>)HTML";
 
     if (!error_message.empty()) {
-        html += R"(<div class="error">)";
+        html += R"HTML(<div class="error">)HTML";
         html += html_escape(error_message);
-        html += R"(</div>)";
+        html += R"HTML(</div>)HTML";
     }
 
-    html += R"(
+    html += R"HTML(
   </div>
+
+  <script>
+    function clearInput() {
+      document.getElementById('inputJson').value = '';
+    }
+
+    function clearOutput() {
+      document.getElementById('outputJson').innerHTML = '';
+    }
+
+    async function copyInput() {
+      const text = document.getElementById('inputJson').value;
+      await navigator.clipboard.writeText(text);
+    }
+
+    async function copyOutput() {
+      const el = document.getElementById('outputJson');
+      const text = el.innerText;
+      await navigator.clipboard.writeText(text);
+    }
+  </script>
 </body>
-</html>)";
+</html>)HTML";
     return html;
 }
 
