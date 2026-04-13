@@ -25,7 +25,7 @@ install(FILES configuration/cfg.json
         DESTINATION /etc/json-formater/
 )
 
-install(FILES systemd/utm-dashboard.service
+install(FILES systemd/json-formater.service
         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/systemd/system
 )
 
